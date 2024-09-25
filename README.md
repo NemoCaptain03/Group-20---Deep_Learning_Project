@@ -13,3 +13,5 @@ Members:
 BI12-210	Nguyễn Tuấn Khiêm
 
 BA12-045	Ứng Quốc Thành Đạt 
+
+BI12-148  Hoàng Hải
