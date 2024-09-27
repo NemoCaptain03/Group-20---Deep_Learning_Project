@@ -3,9 +3,10 @@ import os
 import matplotlib.pyplot as plt
 import torch
 import torch.nn.functional as func
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 from torchvision import transforms as trans
 from torchvision.datasets import ImageFolder
+from torchvision import datasets
 from torchvision.utils import save_image, make_grid
 from tqdm import tqdm
 
@@ -20,10 +21,12 @@ nc = 1  # Number of output channels (=1 because Mednist dataset contain gray pic
 nz = 128  # Input noise vector size(latent size)
 ngf = 64  # Generator feature maps size
 ndf = 64  # Discriminator feature maps size
-epochs = 50  # Number of training epochs
+epochs = 30  # Number of training epochs
 stats = (0.5,), (0.5,)  # Parameter for Normalize
-lr = 0.0002  # Learning rate
+lr = 0.0001  # Learning rate
 betas = (0.5, 0.999)  # Decay rate
+nmax = 16
+nrow = 8
 
 
 # Setup Device
@@ -37,6 +40,7 @@ def get_default_device():
 
 device = get_default_device()
 
+
 # Dataset, DataLoader and Transformations
 train_ds = ImageFolder(DATA_DIR, transform=trans.Compose([
     trans.Grayscale(num_output_channels=1),
@@ -46,7 +50,13 @@ train_ds = ImageFolder(DATA_DIR, transform=trans.Compose([
     trans.Normalize(*stats)
 ]))
 
-train_dl = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=0, pin_memory=True)
+# Define a subset
+N = 500
+indices = list(range(N))
+train_subset = Subset(train_ds, indices)
+
+
+train_dl = DataLoader(train_subset, batch_size=batch_size, shuffle=True, num_workers=0, pin_memory=True)
 
 
 # Helper functions to denormalize the image tensors and display some sample images from a training batch.
@@ -56,7 +66,7 @@ def denorm(img_tensors):
 
 
 # Show images function
-def show_images(images, nmax=64, nrow=8):
+def show_images(images, nmax=nmax, nrow=nrow):
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.set_xticks([]);
     ax.set_yticks([])
@@ -64,13 +74,11 @@ def show_images(images, nmax=64, nrow=8):
 
 
 # Show batch function
-def show_batch(dl, nmax=64):
+def show_batch(dl, nmax=nmax):
     for images, _ in dl:
         show_images(images, nmax)
         break
 
-
-show_batch(train_dl)
 
 # Initialize Generator
 generator = Generator(nz, ngf, nc).to(device)
@@ -132,13 +140,13 @@ os.makedirs(sample_dir, exist_ok=True)
 def save_samples(index, latent_tensors, show=True):
     fake_images = generator(latent_tensors)
     fake_fname = 'generated-images-{0:0=4d}.png'.format(index)
-    save_image(denorm(fake_images), os.path.join(sample_dir, fake_fname), nrow=8)
+    save_image(denorm(fake_images), os.path.join(sample_dir, fake_fname), nrow=nrow)
     print('Saving', fake_fname)
     if show:
         fig, ax = plt.subplots(figsize=(8, 8))
         ax.set_xticks([]);
         ax.set_yticks([])
-        ax.imshow(make_grid(fake_images.cpu().detach(), nrow=8).permute(1, 2, 0))
+        ax.imshow(make_grid(fake_images.cpu().detach(), nrow=nrow).permute(1, 2, 0))
 
 
 fixed_latent = torch.randn(64, nz, 1, 1, device=device)
