@@ -1,18 +1,16 @@
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torchvision.datasets import ImageFolder
-from torchvision.utils import save_image, make_grid
-from torchvision import datasets
-from torchvision import transforms as trans
-from torch.utils.data import DataLoader
-import torch.nn.functional as func
-import matplotlib.pyplot as plt
-from tqdm.notebook import tqdm
 import os
 
-from generator import Generator
+import matplotlib.pyplot as plt
+import torch
+import torch.nn.functional as func
+from torch.utils.data import DataLoader
+from torchvision import transforms as trans
+from torchvision.datasets import ImageFolder
+from torchvision.utils import save_image, make_grid
+from tqdm import tqdm
+
 from discriminator import Discriminator
+from generator import Generator
 
 # Parameter
 DATA_DIR = 'C:/Users/Admin/PycharmProjects/pythonProject/Group-20---Deep_Learning_Project/Mednist'
@@ -41,13 +39,14 @@ device = get_default_device()
 
 # Dataset, DataLoader and Transformations
 train_ds = ImageFolder(DATA_DIR, transform=trans.Compose([
+    trans.Grayscale(num_output_channels=1),
     trans.Resize(image_size),
     trans.CenterCrop(image_size),
     trans.ToTensor(),
     trans.Normalize(*stats)
 ]))
 
-train_dl = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=3, pin_memory=True)
+train_dl = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=0, pin_memory=True)
 
 
 # Helper functions to denormalize the image tensors and display some sample images from a training batch.
