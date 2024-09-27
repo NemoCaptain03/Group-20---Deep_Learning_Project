@@ -12,7 +12,8 @@ class Generator(nn.Module):
 
         self.main = nn.Sequential(
 
-            # Output size = (Input_Size − 1)*Stride − 2*Padding + Kernel_Size
+            # Output size in each layer = (input_size − 1)*stride − 2*padding + kernel_size
+            # out = out_channels x Output size in each layer x Output size in each layer
 
             # First deconvolutional layer
             nn.ConvTranspose2d(nz, ngf * 8, kernel_size=4, stride=1, padding=0, bias=False),
@@ -30,7 +31,7 @@ class Generator(nn.Module):
             nn.ConvTranspose2d(ngf * 4, ngf * 2, kernel_size=4, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(128),
             nn.ReLU(True),
-            # out: 128 x 16 x 16
+            # out: (64 * 2 =) 128 x 16 x 16
 
             # Layer 4: Upsample to 64 feature maps
             nn.ConvTranspose2d(ngf * 2, ngf, kernel_size=4, stride=2, padding=1, bias=False),
@@ -48,14 +49,14 @@ class Generator(nn.Module):
         return self.main(input)
 
 
-# parameter
-nz = 100
+# Parameter
+nz = 128
 ngf = 64
 nc = 1
 
 # Initialize Generator
 generator = Generator(nz, ngf, nc)
 
-# forward pass
+# Forward pass
 noise = torch.randn(16, nz, 1, 1)  # Generate random noise
 fake_images = generator(noise)  # Forward pass to generate images
