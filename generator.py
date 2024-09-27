@@ -6,10 +6,6 @@ class Generator(nn.Module):
     def __init__(self, nz, ngf, nc):
         super(Generator, self).__init__()
 
-        # nz: size of the input noise vector(latent size)
-        # ngf: Size of feature maps in the generator
-        # nc: Number of output channels (=1 because Mednist dataset contain gray pictures only)
-
         self.main = nn.Sequential(
 
             # Output size in each layer = (input_size − 1)*stride − 2*padding + kernel_size
@@ -47,16 +43,3 @@ class Generator(nn.Module):
 
     def forward(self, input):
         return self.main(input)
-
-
-# Parameter
-nz = 128
-ngf = 64
-nc = 1
-
-# Initialize Generator
-generator = Generator(nz, ngf, nc)
-
-# Forward pass
-noise = torch.randn(16, nz, 1, 1)  # Generate random noise
-fake_images = generator(noise)  # Forward pass to generate images

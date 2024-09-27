@@ -6,9 +6,6 @@ class Discriminator(nn.Module):
     def __init__(self, nc, ndf):
         super(Discriminator, self).__init__()
 
-        # nc: Number of input channels (=1 because Mednist dataset contain gray pictures only)
-        # ndf: Size of feature maps in the discriminator
-
         self.main = nn.Sequential(
             # input = 1 x 64 x 64 (which is the output of generator)
             # output size in each layer = ((input_size - kernel_size + 2*padding)/stride) + 1
@@ -48,17 +45,3 @@ class Discriminator(nn.Module):
 
     def forward(self, input):
         return self.main(input)
-
-
-# Parameters
-nc = 1
-ndf = 64
-
-# Initialize Discriminator
-discriminator = Discriminator(nc, ndf)
-
-# Forward pass
-test_image = torch.randn(16, nc, 64, 64)
-output = discriminator(test_image)
-
-print(output.shape)
