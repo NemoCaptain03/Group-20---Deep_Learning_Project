@@ -181,5 +181,5 @@ def fit(epochs, lr, start_idx=1):
     return losses_g, losses_d, real_scores, fake_scores
 
 
-# Start training
-fit(epochs, lr)
+if __name__ == '__main__':
+    fit(epochs, lr)
