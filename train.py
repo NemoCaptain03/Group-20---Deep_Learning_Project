@@ -6,7 +6,6 @@ import torch.nn.functional as func
 from torch.utils.data import DataLoader, Subset
 from torchvision import transforms as trans
 from torchvision.datasets import ImageFolder
-from torchvision import datasets
 from torchvision.utils import save_image, make_grid
 from tqdm import tqdm
 
@@ -51,7 +50,7 @@ train_ds = ImageFolder(DATA_DIR, transform=trans.Compose([
 ]))
 
 # Define a subset
-N = 500
+N = 10000
 indices = list(range(N))
 train_subset = Subset(train_ds, indices)
 
@@ -87,6 +86,8 @@ discriminator = Discriminator(nc, ndf).to(device)
 
 
 def train_discriminator(real_images, opt_d):
+    # Move real_images to the same device as the model
+    real_images = real_images.to(device)
     # Clear discriminator gradients
     opt_d.zero_grad()
 
@@ -184,6 +185,10 @@ def fit(epochs, lr, start_idx=1):
 
         # Save generated images
         save_samples(epoch + start_idx, fixed_latent, show=False)
+
+        # Save the model checkpoints
+        torch.save(generator.state_dict(), 'Gen.pth')
+        torch.save(discriminator.state_dict(), 'Dis.pth')
 
     return losses_g, losses_d, real_scores, fake_scores
 
