@@ -170,7 +170,6 @@ def fit(epochs, lr, start_idx=1):
     # Create optimizers
     opt_d = torch.optim.Adam(discriminator.parameters(), lr=lr, betas=betas)
     opt_g = torch.optim.Adam(generator.parameters(), lr=lr, betas=betas)
-
     for epoch in range(epochs):
         for real_images, _ in tqdm(train_dl):
             # Train discriminator
