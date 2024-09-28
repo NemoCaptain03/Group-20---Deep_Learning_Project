@@ -25,13 +25,13 @@ class Generator(nn.Module):
 
             # Layer 3: Upsample to 128 feature maps
             nn.ConvTranspose2d(ngf * 4, ngf * 2, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(128),
+            nn.BatchNorm2d(ngf * 2),
             nn.ReLU(True),
             # out: (64 * 2 =) 128 x 16 x 16
 
             # Layer 4: Upsample to 64 feature maps
             nn.ConvTranspose2d(ngf * 2, ngf, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(64),
+            nn.BatchNorm2d(ngf),
             nn.ReLU(True),
             # out: 64 x 32 x 32
 

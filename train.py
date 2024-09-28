@@ -85,6 +85,7 @@ generator = Generator(nz, ngf, nc).to(device)
 discriminator = Discriminator(nc, ndf).to(device)
 
 
+# Training Discriminator
 def train_discriminator(real_images, opt_d):
     # Move real_images to the same device as the model
     real_images = real_images.to(device)
@@ -114,6 +115,7 @@ def train_discriminator(real_images, opt_d):
     return loss.item(), real_score, fake_score
 
 
+# Training Generator
 def train_generator(opt_g):
     # Clear generator gradients
     opt_g.zero_grad()
@@ -134,10 +136,12 @@ def train_generator(opt_g):
     return loss.item()
 
 
+# Create folder to store generated images
 sample_dir = 'generated'
 os.makedirs(sample_dir, exist_ok=True)
 
 
+# Define function to generating, saving by format and displaying images
 def save_samples(index, latent_tensors, show=True):
     fake_images = generator(latent_tensors)
     fake_fname = 'generated-images-{0:0=4d}.png'.format(index)
@@ -153,6 +157,7 @@ def save_samples(index, latent_tensors, show=True):
 fixed_latent = torch.randn(64, nz, 1, 1, device=device)
 
 
+# Training loop
 def fit(epochs, lr, start_idx=1):
     torch.cuda.empty_cache()
 
