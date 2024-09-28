@@ -40,7 +40,7 @@ def get_default_device():
 device = get_default_device()
 
 
-# Dataset, DataLoader and Transformations
+# Define Training Dataset, DataLoader and Transformations
 train_ds = ImageFolder(DATA_DIR, transform=trans.Compose([
     trans.Grayscale(num_output_channels=1),
     trans.Resize(image_size),
