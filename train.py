@@ -49,12 +49,14 @@ train_ds = ImageFolder(DATA_DIR, transform=trans.Compose([
     trans.Normalize(*stats)
 ]))
 
-# Define a subset
-N = 10000
-indices = list(range(N))
+# Choose a specific class for training
+train_class_indices = [0]
+indices = [i for i, label in enumerate(train_ds.targets) if label in train_class_indices]
+
+# Create a subset dataset containing only the desired class images
 train_subset = Subset(train_ds, indices)
 
-
+"""Choose train_ds for training the whole dataset, train_subset for the chosen classes"""
 train_dl = DataLoader(train_subset, batch_size=batch_size, shuffle=True, num_workers=0, pin_memory=True)
 
 
@@ -67,7 +69,7 @@ def denorm(img_tensors):
 # Show images function
 def show_images(images, nmax=nmax, nrow=nrow):
     fig, ax = plt.subplots(figsize=(8, 8))
-    ax.set_xticks([]);
+    ax.set_xticks([])
     ax.set_yticks([])
     ax.imshow(make_grid(denorm(images.detach()[:nmax]), nrow=nrow).permute(1, 2, 0))
 
@@ -149,7 +151,7 @@ def save_samples(index, latent_tensors, show=True):
     print('Saving', fake_fname)
     if show:
         fig, ax = plt.subplots(figsize=(8, 8))
-        ax.set_xticks([]);
+        ax.set_xticks([])
         ax.set_yticks([])
         ax.imshow(make_grid(fake_images.cpu().detach(), nrow=nrow).permute(1, 2, 0))
 
