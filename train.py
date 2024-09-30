@@ -14,18 +14,18 @@ from generator import Generator
 
 # Parameter
 DATA_DIR = 'C:/Users/Admin/PycharmProjects/pythonProject/Group-20---Deep_Learning_Project/Mednist'
-batch_size = 128
+batch_size = 100
 image_size = 64
 nc = 1  # Number of output channels (=1 because Mednist dataset contain gray pictures only)
 nz = 128  # Input noise vector size(latent size)
 ngf = 64  # Generator feature maps size
 ndf = 64  # Discriminator feature maps size
-epochs = 30  # Number of training epochs
+epochs = 50  # Number of training epochs
 stats = (0.5,), (0.5,)  # Parameter for Normalize
 lr = 0.0001  # Learning rate
 betas = (0.5, 0.999)  # Decay rate
-nmax = 16
-nrow = 8
+nmax = 25
+nrow = 5
 
 
 # Setup Device
@@ -38,7 +38,6 @@ def get_default_device():
 
 
 device = get_default_device()
-
 
 # Define Training Dataset, DataLoader and Transformations
 train_ds = ImageFolder(DATA_DIR, transform=trans.Compose([
@@ -146,6 +145,7 @@ os.makedirs(sample_dir, exist_ok=True)
 # Define function to generating, saving by format and displaying images
 def save_samples(index, latent_tensors, show=True):
     fake_images = generator(latent_tensors)
+    fake_images = fake_images[:nmax]
     fake_fname = 'generated-images-{0:0=4d}.png'.format(index)
     save_image(denorm(fake_images), os.path.join(sample_dir, fake_fname), nrow=nrow)
     print('Saving', fake_fname)
@@ -153,7 +153,7 @@ def save_samples(index, latent_tensors, show=True):
         fig, ax = plt.subplots(figsize=(8, 8))
         ax.set_xticks([])
         ax.set_yticks([])
-        ax.imshow(make_grid(fake_images.cpu().detach(), nrow=nrow).permute(1, 2, 0))
+        ax.imshow(make_grid(denorm(fake_images.cpu().detach()), nrow=nrow).permute(1, 2, 0))
 
 
 fixed_latent = torch.randn(64, nz, 1, 1, device=device)
@@ -172,6 +172,19 @@ def fit(epochs, lr, start_idx=1):
     # Create optimizers
     opt_d = torch.optim.Adam(discriminator.parameters(), lr=lr, betas=betas)
     opt_g = torch.optim.Adam(generator.parameters(), lr=lr, betas=betas)
+
+    # Resume from checkpoint if exists
+    start_epoch = 0
+    checkpoint_path = 'model_checkpoint.pth'
+    if os.path.exists(checkpoint_path):
+        checkpoint = torch.load(checkpoint_path)
+        generator.load_state_dict(checkpoint['generator_state_dict'])
+        discriminator.load_state_dict(checkpoint['discriminator_state_dict'])
+        opt_g.load_state_dict(checkpoint['optimizer_g_state_dict'])
+        opt_d.load_state_dict(checkpoint['optimizer_d_state_dict'])
+        start_epoch = checkpoint['epoch'] + 1
+        print(f"Resuming training from epoch {start_epoch}")
+
     for epoch in range(epochs):
         for real_images, _ in tqdm(train_dl):
             # Train discriminator
@@ -192,9 +205,14 @@ def fit(epochs, lr, start_idx=1):
         # Save generated images
         save_samples(epoch + start_idx, fixed_latent, show=False)
 
-        # Save the model checkpoints
-        torch.save(generator.state_dict(), 'Gen.pth')
-        torch.save(discriminator.state_dict(), 'Dis.pth')
+        # Save the model checkpoints (including optimizer state and epoch)
+        torch.save({
+            'epoch': epoch,
+            'generator_state_dict': generator.state_dict(),
+            'discriminator_state_dict': discriminator.state_dict(),
+            'optimizer_g_state_dict': opt_g.state_dict(),
+            'optimizer_d_state_dict': opt_d.state_dict(),
+        }, checkpoint_path)
 
     return losses_g, losses_d, real_scores, fake_scores
 
