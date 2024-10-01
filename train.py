@@ -20,9 +20,9 @@ nc = 1  # Number of output channels (=1 because Mednist dataset contain gray pic
 nz = 128  # Input noise vector size(latent size)
 ngf = 64  # Generator feature maps size
 ndf = 64  # Discriminator feature maps size
-epochs = 50  # Number of training epochs
+epochs = 25  # Number of training epochs
 stats = (0.5,), (0.5,)  # Parameter for Normalize
-lr = 0.0001  # Learning rate
+lr = 0.00005  # Learning rate
 betas = (0.5, 0.999)  # Decay rate
 nmax = 25
 nrow = 5
